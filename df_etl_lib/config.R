@@ -15,8 +15,12 @@ get_config = function(config_file) {
   config = read_yaml(config_file)
 }
 
-validate_config = function(config) {
-  mandatory_keys = list("name", "reader", "destination", "writer", "data")
+copy_config = function(args, out_dir, overwrite = T) {
+  file.copy(args$config, out_dir, overwrite = overwrite)
+}
+
+validate_config = function(config, merge_by_options) {
+  mandatory_keys = list("name", "reader", "destination", "writer", "data", "merge_by")
   config_keys = names(config)
 
   for(mandatory_key in mandatory_keys) {
@@ -25,10 +29,16 @@ validate_config = function(config) {
     }
   }
 
-  for(str_item in list("name", "reader", "destination", "writer")) {
+  for(str_item in list("name", "reader", "destination", "writer", "merge_by")) {
     if(!is.character(config[[str_item]])) {
       stop(str_c("Configuration item must be a string: ", str_item))
     }
+  }
+
+  merge_by = config$merge_by
+  merge_by_options_str = toString(merge_by_options)
+  if(!merge_by %in% merge_by_options) {
+    stop(str_interp("Configuration value '${merge_by}' for merge_by is invalid. Must be one of '[${merge_by_options_str}]'."))
   }
 
   if(!is.list(config$data)) {

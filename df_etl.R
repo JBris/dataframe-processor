@@ -56,17 +56,17 @@ main = function() {
   
   # Load configuration
   CONFIG = get_config(args$config)
-  CONFIG = validate_config(CONFIG)
+  CONFIG = validate_config(CONFIG, MERGE_BY_OPTIONS)
 
   # Create output directory
   out_dir_name = str_c(args$out_dir, "_", CONFIG$name)
   out_dir = create_out_dir(out_dir_name)
-  file.copy(args$config, out_dir, overwrite = T)
+  copy_config(args, out_dir)
 
-  print(CONFIG)
-  message("Hello")
-  
-
+  # Execute pipeline
+  processed_dfs = execute_pipeline(CONFIG$data, READER_PLUGINS, WRITER_PLUGINS)
+  save_dfs(processed_dfs, out_dir, WRITER_PLUGINS, CONFIG$merge_by)
+  message("Pipeline completed.")
 } 
 
 main()
