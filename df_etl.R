@@ -12,10 +12,13 @@ source("df_etl_lib/pipelines.R")
 # Imports
 ##################################################
 
-options(warn = -1)
+options(
+  warn = -1, 
+  readr.num_columns = 0
+)
 
 library(optparse)
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse)) 
 
 ##################################################
 # Constants
