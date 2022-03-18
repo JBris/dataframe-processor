@@ -50,7 +50,7 @@ validate_config = function(config, merge_by_options) {
 }
 
 validate_data_def = function(config) {
-  mandatory_keys = list("source")
+  mandatory_keys = list("source", "pipeline")
   optional_keys = list("reader", "destination", "writer")
   data_definitions = config$data
   data_keys = names(data_definitions)
@@ -75,6 +75,10 @@ validate_data_def = function(config) {
       if(!is.character(data_definition[[str_item]])) {
         stop(str_interp("Element '${str_item}' in data definition '${data_key}' must be a string."))
       }
+    }
+
+    if(!is.list(config$data)) {
+      stop(str_interp("Pipeline in data definition '${data_key}' must be a list of data processors."))
     }
 
     data_definitions[[data_key]] = data_definition

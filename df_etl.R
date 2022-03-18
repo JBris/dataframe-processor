@@ -7,6 +7,7 @@
 source("df_etl_lib/config.R")
 source("df_etl_lib/data.R")
 source("df_etl_lib/pipelines.R")
+source("df_etl_lib/utils.R")
 
 ##################################################
 # Imports
@@ -36,14 +37,21 @@ option_list = list(
     c("-c", "--config"), 
     type = "character", 
     default = "config.yaml", 
-    help = "Pipeline configuration file", 
+    help = "Pipeline configuration file.", 
     metavar = "character"
   ),
   make_option(
     c("-o", "--out_dir"), 
     type = "character", 
     default = OUT_SUBDIR, 
-    help = "Subdirectory name for outputs", 
+    help = "Subdirectory name for outputs.", 
+    metavar = "character"
+  ),
+    make_option(
+    c("-p", "--prehook"), 
+    type = "character", 
+    default = NULL, 
+    help = "A prehook script for modifying and extending the pipelines default functionality.", 
     metavar = "character"
   )
 ) 
@@ -56,7 +64,8 @@ main = function() {
   # Read args
   opt_parser = OptionParser(option_list = option_list)
   args = parse_args(opt_parser)
-  
+  call_prehook(args$prehook)
+
   # Load configuration
   CONFIG = get_config(args$config)
   CONFIG = validate_config(CONFIG, MERGE_BY_OPTIONS)

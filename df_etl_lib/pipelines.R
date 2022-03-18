@@ -39,10 +39,17 @@ execute_pipeline = function(data_definitions, reader_plugins, writer_plugins) {
 
         reader_func = reader_plugins[[reader_plugin]]
         df = reader_func(data_source)
-
-        destination_lists[[destination_key]][[data_key]] = df
+        processed_df = process_df(df, data_definition$pipeline)
+        destination_lists[[destination_key]][[data_key]] = processed_df
     }
     destination_lists
+}
+
+process_df = function(df, pipeline) {
+    if(length(pipeline) == 0) {
+        return(df)
+    }
+    df
 }
 
 save_dfs = function(processed_dfs, out_dir, writer_plugins, merge_by) {
