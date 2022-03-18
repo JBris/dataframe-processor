@@ -1,0 +1,9 @@
+name: example
+reader: csv
+destination: data.csv
+writer: csv
+data: 
+  iris:
+    source: examples/iris.csv
+  mtcars:
+    source: examples/iris.csv

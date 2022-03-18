@@ -4,6 +4,7 @@
 # Libraries
 ##################################################
 
+source("df_etl_lib/config.R")
 source("df_etl_lib/data.R")
 source("df_etl_lib/pipelines.R")
 
@@ -15,18 +16,13 @@ options(warn = -1)
 
 library(optparse)
 library(tidyverse)
-library(yaml)
-
-options(warn = 0)
 
 ##################################################
 # Constants
 ##################################################
 
 # Output file prefix
-CURRENT_DATE = Sys.Date() %>% format("%Y_%m_%d")
-CURRENT_TIME = Sys.time() %>% format("%H_%M")
-OUT_SUBDIR = str_c(CURRENT_DATE, "_", CURRENT_TIME)
+OUT_SUBDIR = get_subdir_prefix()
 
 ##################################################
 # Option list
@@ -39,6 +35,13 @@ option_list = list(
     default = "config.yaml", 
     help = "Pipeline configuration file", 
     metavar = "character"
+  ),
+  make_option(
+    c("-o", "--out_dir"), 
+    type = "character", 
+    default = OUT_SUBDIR, 
+    help = "Subdirectory name for outputs", 
+    metavar = "character"
   )
 ) 
 
@@ -50,9 +53,20 @@ main = function() {
   # Read args
   opt_parser = OptionParser(option_list = option_list)
   args = parse_args(opt_parser)
+  
+  # Load configuration
+  CONFIG = get_config(args$config)
+  CONFIG = validate_config(CONFIG)
 
+  # Create output directory
+  out_dir_name = str_c(args$out_dir, "_", CONFIG$name)
+  out_dir = create_out_dir(out_dir_name)
+  file.copy(args$config, out_dir, overwrite = T)
+
+  print(CONFIG)
   message("Hello")
   
+
 } 
 
 main()
