@@ -83,8 +83,8 @@ main = function() {
   copy_config(args, out_dir)
 
   # Execute pipeline
-  processed_dfs = execute_pipeline(CONFIG$data, READER_PLUGINS, WRITER_PLUGINS)
-  save_dfs(processed_dfs, out_dir, WRITER_PLUGINS, CONFIG$merge_by)
+  processed_items = execute_pipeline(CONFIG)
+  save_dfs(processed_items, out_dir, CONFIG)
   message("Pipeline completed.")
 } 
 

@@ -2,18 +2,6 @@
 # Library
 ##################################################
 
-READER_PLUGINS = list(
-    csv = readr::read_csv,
-    tsv = readr::read_tsv
-)
-
-WRITER_PLUGINS = list(
-    csv = readr::write_csv,
-    tsv = readr::write_tsv
-)
-
-MERGE_BY_OPTIONS = list("col", "row")
-
 get_subdir_prefix = function() {
     current_date = Sys.Date() %>% format("%Y_%m_%d")
     current_time = Sys.time() %>% format("%H_%M")
@@ -33,9 +21,15 @@ clear_out_dir = function(args, main_dir = "out") {
 
     list.dirs(main_dir, recursive = F) %>%
         (function(out_dir) {
+            if(length(out_dir) == 0) {
+                return()
+            }
+
             delete_res = unlink(out_dir, recursive = T)
             if(delete_res == 0) {
                 message(str_c("Deleted directory: ", out_dir, "\n"))
+            } else {
+                message(str_c("Failed to delete directory: ", out_dir, "\n"))
             }
         })(.)
 }
