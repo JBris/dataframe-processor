@@ -49,6 +49,8 @@ process_df = function(df, pipeline) {
     if(length(pipeline) == 0) {
         return(df)
     }
+
+    # print(pipeline)
     df
 }
 

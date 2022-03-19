@@ -25,3 +25,17 @@ create_out_dir = function(sub_dir, main_dir = "out", showWarnings = F) {
     dir.create(out_dir, showWarnings = showWarnings)
     out_dir
 }
+
+clear_out_dir = function(args, main_dir = "out") {
+    if(!args$delete_out) {
+        return()
+    }
+
+    list.dirs(main_dir, recursive = F) %>%
+        (function(out_dir) {
+            delete_res = unlink(out_dir, recursive = T)
+            if(delete_res == 0) {
+                message(str_c("Deleted directory: ", out_dir, "\n"))
+            }
+        })(.)
+}

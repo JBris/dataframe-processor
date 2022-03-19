@@ -77,12 +77,40 @@ validate_data_def = function(config) {
       }
     }
 
-    if(!is.list(config$data)) {
-      stop(str_interp("Pipeline in data definition '${data_key}' must be a list of data processors."))
-    }
-
+    data_definition$pipeline = validate_pipeline(data_definition$pipeline, data_key)
     data_definitions[[data_key]] = data_definition
   }
 
   data_definitions
+}
+
+validate_pipeline = function(data_pipeline, data_key) {
+    if(!is.list(data_pipeline)) {
+      stop(str_interp("Pipeline in data definition '${data_key}' must be a list of data processors."))
+    }
+
+    if(length(data_pipeline) == 0) {
+        return(data_pipeline)
+    }
+
+    source_cols = names(data_pipeline)    
+    for(col in source_cols) {
+      pipeline_definition = data_pipeline[[col]]
+
+      if(is.null(pipeline_definition$destination)) {
+        pipeline_definition$destination = col
+      }
+
+      if(is.null(pipeline_definition$steps)) {
+        pipeline_definition$steps = list()
+      }
+
+      if(!is.list(pipeline_definition$steps)) {
+        stop(str_interp("Pipeline steps for '${col}' in data definition '${data_key}' must be a list."))
+      }
+
+      data_pipeline[[col]] = pipeline_definition
+    }
+
+    data_pipeline
 }

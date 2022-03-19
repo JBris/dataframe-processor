@@ -47,12 +47,18 @@ option_list = list(
     help = "Subdirectory name for outputs.", 
     metavar = "character"
   ),
-    make_option(
+  make_option(
     c("-p", "--prehook"), 
     type = "character", 
     default = NULL, 
     help = "A prehook script for modifying and extending the pipelines default functionality.", 
     metavar = "character"
+  ),
+  make_option(
+    c("-d", "--delete_out"), 
+    action = "store_true",
+    default = F, 
+    help = "Delete the contents of the output directory before running the pipeline."
   )
 ) 
 
@@ -65,7 +71,8 @@ main = function() {
   opt_parser = OptionParser(option_list = option_list)
   args = parse_args(opt_parser)
   call_prehook(args$prehook)
-
+  clear_out_dir(args)
+  
   # Load configuration
   CONFIG = get_config(args$config)
   CONFIG = validate_config(CONFIG, MERGE_BY_OPTIONS)
