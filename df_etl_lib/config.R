@@ -20,7 +20,7 @@ copy_config = function(args, out_dir, overwrite = T) {
 }
 
 validate_config = function(config, merge_by_options) {
-  mandatory_keys = list("name", "reader", "destination", "writer", "data", "merge_by")
+  mandatory_keys = list("name", "defaults", "data")
   config_keys = names(config)
 
   for(mandatory_key in mandatory_keys) {
@@ -29,25 +29,37 @@ validate_config = function(config, merge_by_options) {
     }
   }
 
-  for(str_item in list("name", "destination")) {
+  for(str_item in list("name")) {
     if(!is.character(config[[str_item]])) {
       stop(str_c("Configuration item must be a string: ", str_item))
     }
   }
 
-  for(list_item in list("data")) {
+  for(list_item in list("defaults", "data")) {
     if(!is.list(config[[list_item]])) {
       stop(str_c("Configuration item must be a list: ", list_item))
     }
   }
-
-  for(func_item in list("reader", "writer", "merge_by")) {
-    func_definition = config[[func_item]]
-    config[[func_item]] = validate_func_definition(func_definition, func_item)
-  }
-
+  
+  config$defaults = validate_defaults(config)
   config$data = validate_data_def(config)
   config
+}
+
+validate_defaults = function(config) {
+  mandatory_keys = list("reader", "destination", "writer", "merge_by")
+
+  for(str_item in list("destination")) {
+    if(!is.character(config$defaults[[str_item]])) {
+      stop(str_c("Configuration default must be a string: ", str_item))
+    }
+  }
+
+  for(func_item in list("reader", "writer", "merge_by")) {
+    func_definition = config$defaults[[func_item]]
+    config$defaults[[func_item]] = validate_func_definition(func_definition, func_item)
+  }
+  config$defaults
 }
 
 validate_func_definition = function(func_definition, func_item) {
@@ -96,7 +108,7 @@ validate_data_def = function(config) {
 
     for(optional_key in optional_keys) {
       if (!optional_key %in% definition_keys) { 
-        data_definition[[optional_key]] = config[[optional_key]]
+        data_definition[[optional_key]] = config$defaults[[optional_key]]
       }
     } 
 

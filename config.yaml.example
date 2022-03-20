@@ -1,18 +1,16 @@
 name: example
-reader: 
-  name: read_csv
-  args: 
-    col_names: true
 
-destination: data.csv
-writer: 
-  name: write_csv
-  args: 
-    append: false
-merge_by: 
-  name: bind_rows
-  args: 
-    - foo: bar
+defaults:
+  destination: data.csv
+  reader: 
+    name: read_csv
+    args: # pass arguments to function
+      col_names: true
+  writer: 
+    name: write_csv
+  merge_by: 
+    name: bind_rows
+
 data: 
   iris:
     source: examples/iris.csv
