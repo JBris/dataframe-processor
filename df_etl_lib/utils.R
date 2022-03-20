@@ -2,14 +2,14 @@
 # Library
 ##################################################
 
-call_prehook = function(prehook) {
-    if(!is.character(prehook)) {
+call_hook = function(hook, hook_type) {
+    if(!is.character(hook)) {
         return()
     }
 
-    if(!file.exists(prehook)) {
-        stop(str_c("Prehook file does not exist: ", prehook))
+    if(!file.exists(hook)) {
+        stop(str_interp("${hook_type} file does not exist: ${hook}"))
     }
 
-    source(prehook)
+    source(hook)
 }

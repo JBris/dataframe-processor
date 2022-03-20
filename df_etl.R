@@ -51,7 +51,14 @@ option_list = list(
     c("-p", "--prehook"), 
     type = "character", 
     default = NULL, 
-    help = "A prehook script for modifying and extending the pipelines default functionality.", 
+    help = "A prehook script for modifying and extending the pipeline's default functionality.", 
+    metavar = "character"
+  ),
+  make_option(
+    c("-q", "--posthook"), 
+    type = "character", 
+    default = NULL, 
+    help = "A posthook script for modifying the processed dataframes before merging and saving occurs.", 
     metavar = "character"
   ),
   make_option(
@@ -70,7 +77,7 @@ main = function() {
   # Read args
   opt_parser = OptionParser(option_list = option_list)
   args = parse_args(opt_parser)
-  call_prehook(args$prehook)
+  call_hook(args$prehook, "Prehook")
   clear_out_dir(args)
   
   # Load configuration
@@ -83,7 +90,8 @@ main = function() {
   copy_config(args, out_dir)
 
   # Execute pipeline
-  processed_items = execute_pipeline(CONFIG)
+  processed_items <<- execute_pipeline(CONFIG)
+  call_hook(args$posthook, "Posthook")
   save_dfs(processed_items, out_dir, CONFIG)
   message("Pipeline completed.")
 } 
