@@ -40,6 +40,13 @@ option_list = list(
     help = "Pipeline configuration file.", 
     metavar = "character"
   ),
+  make_option (
+    c("-e", "--env"), 
+    type = "character", 
+    default = NULL, 
+    help = "The environment variable file.", 
+    metavar = "character"
+  ),
   make_option(
     c("-o", "--out_dir"), 
     type = "character", 
@@ -77,8 +84,9 @@ main = function() {
   # Read args
   opt_parser = OptionParser(option_list = option_list)
   args = parse_args(opt_parser)
+  load_env_vars(args$env)
   call_hook(args$prehook, "Prehook")
-  clear_out_dir(args)
+  clear_out_dir(args$delete_out)
   
   # Load configuration
   CONFIG = get_config(args$config)
@@ -88,7 +96,7 @@ main = function() {
   out_dir_name = str_c(args$out_dir, "_", CONFIG$name)
   out_dir = create_out_dir(out_dir_name)
   copy_config(args, out_dir)
-
+  
   # Execute pipeline
   processed_items <<- execute_pipeline(CONFIG)
   call_hook(args$posthook, "Posthook")

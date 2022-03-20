@@ -14,8 +14,8 @@ create_out_dir = function(sub_dir, main_dir = "out", showWarnings = F) {
     out_dir
 }
 
-clear_out_dir = function(args, main_dir = "out") {
-    if(!args$delete_out) {
+clear_out_dir = function(delete_out, main_dir = "out") {
+    if(!delete_out) {
         return()
     }
 
