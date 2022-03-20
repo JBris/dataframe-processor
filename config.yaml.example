@@ -18,31 +18,83 @@ data:
       preprocess:
         -
           source: Sepal.Length
-          destination: length
+          destination: col_1
           steps: 
             -
               name: round
               args:
-                digits: 0
+                digits: 1
         -
           source: Sepal.Width
-          destination: width
+          destination: col_2
           steps: 
             -
-              name: round
-              args:
-                digits: 0
+              name: floor
             -
               name: as.character
         - 
           source:
-            - length
-            - width
-          destination: length_width
+            - col_1
+            - col_2
+          destination: col_3
           steps:
             - 
-              eval: paste(data_source$length, data_source$width)
+              eval: paste(data_source$col_1, data_source$col_2)
+
+      map:
+        - 
+          source: col_1
+        - 
+          source: col_2
+        -
+          source: col_3
+
+      postprocess:
+        -
+          source: col_1
+          steps: 
+            -
+              name: ceiling
     
   mtcars:
     source: examples/mtcars.csv
-    pipeline: []
+    pipeline: 
+      preprocess:
+        -
+          source: mpg
+          destination: col_1
+          steps: 
+            -
+              eval: 2 * data_source
+
+        -
+          source: disp
+          destination: col_2
+          steps: 
+            -
+              name: floor
+            -
+              name: as.character
+        - 
+          source:
+            - col_1
+            - col_2
+          destination: col_3
+          steps:
+            - 
+              eval: paste(data_source$col_1, data_source$col_2)
+
+      map:
+        - 
+          source: col_1
+        - 
+          source: col_2
+        -
+          source: col_3
+          
+      postprocess:
+        -
+          source: col_1
+          steps: 
+            -
+              name: round
