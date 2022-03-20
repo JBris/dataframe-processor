@@ -54,18 +54,13 @@ process_df = function(df, pipeline, data_key) {
 }
 
 process_stage = function(df, pipeline, stage_key, new_df = F, data_key = "") {
-    print(stage_key)
-    
     stage = pipeline[[stage_key]]
     if(is.null(stage)) {
         return(df)
     }
-
-    print(pipeline)
     
     if(new_df) {
-        
-        processing_df = tibble()
+        processing_df = tibble(.rows = nrow(df))
     } 
     
     for(stage_item in stage) {
