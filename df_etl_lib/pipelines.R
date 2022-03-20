@@ -33,23 +33,81 @@ execute_pipeline = function(config) {
         destination_key = str_interp("${data_destination}_${data_writer}_${data_merge_by}")
 
         if(!file.exists(data_source)) {
-            stop(str_interp("Data source '${data_source}' does not exist for '${data_key}' data definition.", ))
+            stop(str_interp("Data source '${data_source}' does not exist for '${data_key}' data definition."))
         }
         
         df = do.call(data_reader$name, c(data_source, data_reader$args))
-        processed_df = process_df(df, data_definition$pipeline)
+        processed_df = process_df(df, data_definition$pipeline, data_key)
         destination_lists[[destination_key]][["dfs"]][[data_key]] = processed_df
     }
     destination_lists
 }
 
-process_df = function(df, pipeline) {
+process_df = function(df, pipeline, data_key) {
     if(length(pipeline) == 0) {
+        return(df)
+    }    
+    df = process_stage(df, pipeline, "preprocess", data_key = data_key)
+    df = process_stage(df, pipeline, "map", new_df = T, data_key = data_key)
+    df = process_stage(df, pipeline, "postprocess", data_key = data_key)
+    df
+}
+
+process_stage = function(df, pipeline, stage_key, new_df = F, data_key = "") {
+    print(stage_key)
+    
+    stage = pipeline[[stage_key]]
+    if(is.null(stage)) {
         return(df)
     }
 
-    # print(pipeline)
-    df
+    print(pipeline)
+    
+    if(new_df) {
+        
+        processing_df = tibble()
+    } 
+    
+    for(stage_item in stage) {
+        source_name = stage_item$source
+        destination_name = stage_item$destination
+        steps = stage_item$steps
+
+        if(length(source_name) == 1) {
+            data_source = df[[source_name]] 
+        } else {
+            data_source = df[source_name] 
+        }    
+        
+        for(step in steps) {
+            if(!is.null(step$eval)) {
+                data_source = eval(str2expression(step$eval))
+            } else {
+                data_source = do.call(step$name, c(list(data_source), step$args))  
+            }
+        }
+
+        data_source = as_tibble(data_source)
+        data_ndims = ncol(data_source)
+        if(data_ndims == 1) {        
+            if(new_df) {
+                processing_df[destination_name] = data_source
+            } else {
+                df[destination_name] = data_source
+            }
+        } else {
+            stop(str_interp(
+                "Invalid number of dimensions '${data_ndims}' for destination '${destination_name}' in stage ${stage_key} for '${data_key}' data definition."
+            )) 
+        }
+        
+    }
+
+    if(new_df) {
+        processing_df  
+    } else {
+        df
+    }
 }
 
 save_dfs = function(processed_items, out_dir, config) {
@@ -63,26 +121,4 @@ save_dfs = function(processed_items, out_dir, config) {
         do.call(data_writer$name, c(list(merged_dfs), out_file, data_writer$args))
         message(str_c("Created file: ", out_file))
     }
-
-    
-    # for(writer_key in writer_keys) {
-    #     split_key = stringi::stri_reverse(writer_key) %>%
-    #         str_split("_", n = 2, simplify = T) %>%
-    #         map_chr(stringi::stri_reverse)
-
-    #     dfs = processed_dfs[[writer_key]]
-    #     if(merge_by == "col") {
-    #         merged_dfs = bind_cols(dfs)
-    #     } else {
-    #         merged_dfs = bind_rows(dfs)
-    #     }
-
-    #     writer_plugin = split_key[1]
-    #     data_destination = split_key[2]
-    #     out_file = file.path(out_dir, data_destination)
-    #     writer_func = writer_plugins[[writer_plugin]]
-    #     writer_func(merged_dfs, out_file)
-    #     message(str_c("Created file: ", out_file))
-    # }
-    
 }

@@ -54,6 +54,10 @@ validate_func_definition = function(func_definition, func_item) {
   if(!is.list(func_definition)) {
     stop(str_c("Function definition must be a list: ", func_item))
   }
+
+  if(!is.null(func_definition$eval)) {
+    return(func_definition)
+  }
   
   if(is.null(func_definition$name)) {
     stop(str_c("Function definition requires a name: ", func_item))
@@ -128,35 +132,59 @@ validate_pipeline = function(data_pipeline, data_key) {
         return(data_pipeline)
     }
 
-    source_cols = names(data_pipeline)    
-    for(col in source_cols) {
-      pipeline_definition = data_pipeline[[col]]
-      steps = pipeline_definition$steps
-      step_keys = names(steps)
+    stage_keys = c("preprocess", "map", "postprocess")
+    stages = names(data_pipeline)
 
-      if(is.null(pipeline_definition$destination)) {
-        pipeline_definition$destination = col
-      }
-
-      if(is.null(pipeline_definition$steps)) {
-        pipeline_definition$steps = list()
-      }
-
-      if(!is.list(pipeline_definition$steps)) {
-        stop(str_interp("Pipeline steps for '${col}' in data definition '${data_key}' must be a list."))
-      }
-
-      for(step_key in step_keys) {
-        step = steps[[step_key]]
-
-        step = validate_func_definition(
-          step, 
-          str_interp("Step '${step_key}' in source column '${col}' in data definition '${data_key}'.")
-        )
-      }
-
-      data_pipeline[[col]] = pipeline_definition
+    stage_intersect = Reduce(intersect, list(stage_keys, stages))
+    if(length(stage_intersect) == 0) {
+        return(df)
     }
 
-    data_pipeline
+    for(i in seq_along(stage_keys)) {
+      stage_key = stage_keys[[i]]
+      stage = data_pipeline[[stage_key]]
+      
+      for(j in seq_along(stage)) {
+        stage_item = stage[[j]]
+        
+        if(is.null(stage_item$source)) {
+          stop(str_interp("Data source in item '${j}' in stage '${stage_key}' in data definition '${data_key}' is required."))
+        }
+        if(!is.character(stage_item$source)) {
+          stop(
+            str_interp("Data source in item '${j}' in stage '${stage_key}' in data definition '${data_key}' must be a string or list of strings.")
+          )
+        }
+
+        if(is.null(stage_item$destination)) {
+          if(length(stage_item$source) == 1) {
+            stage_item$destination = stage_item$source
+          } else {
+            stop(str_interp("Data destination in item '${j}' in stage '${stage_key}' in data definition '${data_key}' must be provided."))
+          }
+        }
+
+        if(is.null(stage_item$steps)) {
+          stage_item$steps = list()
+        }
+
+        if(!is.list(stage_item$steps)) {
+          stop(str_interp("Data steps in item '${j}' in stage '${stage_key}' in data definition '${data_key}' must be a list."))
+        }
+
+        for(k in seq_along(stage_item$steps)) {
+          step = stage_item$steps[[k]]
+          step = validate_func_definition(
+            step, 
+            str_interp("Step '${k}' of data steps in item '${i}' in stage '${stage_key}' in data definition '${data_key}'.")
+          )
+          stage_item$steps[[k]] = step
+        }
+        stage[[j]] = stage_item
+      }
+      
+      data_pipeline[[stage_key]] = stage
+    }
+    
+    data_pipeline    
 }

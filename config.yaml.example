@@ -1,10 +1,50 @@
 name: example
-reader: csv
+reader: 
+  name: read_csv
+  args: 
+    col_names: true
+
 destination: data.csv
-writer: csv
-merge_by: row
+writer: 
+  name: write_csv
+  args: 
+    append: false
+merge_by: 
+  name: bind_rows
+  args: 
+    - foo: bar
 data: 
   iris:
     source: examples/iris.csv
+    pipeline: 
+      preprocess:
+        -
+          source: Sepal.Length
+          destination: length
+          steps: 
+            -
+              name: round
+              args:
+                digits: 0
+        -
+          source: Sepal.Width
+          destination: width
+          steps: 
+            -
+              name: round
+              args:
+                digits: 0
+            -
+              name: as.character
+        - 
+          source:
+            - length
+            - width
+          destination: length_width
+          steps:
+            - 
+              eval: paste(data_source$length, data_source$width)
+    
   mtcars:
     source: examples/mtcars.csv
+    pipeline: []
