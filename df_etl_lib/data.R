@@ -33,3 +33,18 @@ clear_out_dir = function(delete_out, main_dir = "out") {
             }
         })(.)
 }
+
+
+perform_eda = function(merged_df_list, output_dir) {
+    library(DataExplorer)
+
+    message("Performing EDA...")
+    for(merged_df_data in merged_df_list) {
+        destination = merged_df_data$destination
+        df = merged_df_data$df
+        output_file = str_interp("${destination}.html")
+        create_report(df, output_file = output_file, output_dir = file.path(getwd(), output_dir), quiet = T)
+        output_file = file.path(output_dir, output_file)
+        message(str_interp("Created ${output_file}"))
+    }
+}

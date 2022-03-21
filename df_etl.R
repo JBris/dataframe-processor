@@ -40,12 +40,17 @@ option_list = list(
     help = "Pipeline configuration file.", 
     metavar = "character"
   ),
+  make_option(
+    c("-d", "--delete_out"), 
+    action = "store_true",
+    default = F, 
+    help = "Delete the contents of the output directory before running the pipeline."
+  ),
   make_option (
-    c("-e", "--env"), 
-    type = "character", 
-    default = NULL, 
-    help = "The environment variable file.", 
-    metavar = "character"
+    c("-e", "--eda"), 
+    action = "store_true",
+    default = F, 
+    help = "Perform an EDA on the outputted datasets.", 
   ),
   make_option(
     c("-o", "--out_dir"), 
@@ -68,11 +73,12 @@ option_list = list(
     help = "A posthook script for modifying the processed dataframes before merging and saving occurs.", 
     metavar = "character"
   ),
-  make_option(
-    c("-d", "--delete_out"), 
-    action = "store_true",
-    default = F, 
-    help = "Delete the contents of the output directory before running the pipeline."
+  make_option (
+    c("-v", "--env"), 
+    type = "character", 
+    default = NULL, 
+    help = "The environment variable file.", 
+    metavar = "character"
   )
 ) 
 
@@ -100,7 +106,10 @@ main = function() {
   # Execute pipeline
   processed_items <<- execute_pipeline(CONFIG)
   call_hook(args$posthook, "Posthook")
-  save_dfs(processed_items, out_dir, CONFIG)
+  saved_df_list = save_dfs(processed_items, out_dir, CONFIG)
+  if(args$eda) {
+    perform_eda(saved_df_list, out_dir)
+  }
   message("Pipeline completed.")
 } 
 

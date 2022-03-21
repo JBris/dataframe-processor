@@ -106,6 +106,7 @@ process_stage = function(df, pipeline, stage_key, new_df = F, data_key = "") {
 }
 
 save_dfs = function(processed_items, out_dir, config) {
+    saved_df_list = list()
     for(processed_item in processed_items) {
         data_destination = processed_item$destination
         data_writer = processed_item$writer
@@ -114,6 +115,8 @@ save_dfs = function(processed_items, out_dir, config) {
         out_file = file.path(out_dir, data_destination)
         merged_dfs = do.call(merge_by$name, list(dfs, merge_by$args))
         do.call(data_writer$name, c(list(merged_dfs), out_file, data_writer$args))
+        saved_df_list[[data_destination]] = list(destination = data_destination, df = merged_dfs)
         message(str_c("Created file: ", out_file))
     }
+    saved_df_list
 }
