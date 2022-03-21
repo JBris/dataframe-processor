@@ -37,47 +37,47 @@ option_list = list(
     c("-c", "--config"), 
     type = "character", 
     default = "config.yaml", 
-    help = "Pipeline configuration file.", 
+    help = "Pipeline configuration file [default = %default].", 
     metavar = "character"
   ),
   make_option(
     c("-d", "--delete_out"), 
     action = "store_true",
     default = F, 
-    help = "Delete the contents of the output directory before running the pipeline."
+    help = "Delete the contents of the output directory before running the pipeline [default = %default]."
   ),
   make_option (
     c("-e", "--eda"), 
     action = "store_true",
     default = F, 
-    help = "Perform an EDA on the outputted datasets.", 
+    help = "Perform an EDA on the outputted datasets [default = %default]."
   ),
   make_option(
     c("-o", "--out_dir"), 
     type = "character", 
     default = OUT_SUBDIR, 
-    help = "Subdirectory name for outputs.", 
+    help = "Subdirectory name for outputs [default = %default].", 
     metavar = "character"
   ),
   make_option(
     c("-p", "--prehook"), 
     type = "character", 
     default = NULL, 
-    help = "A prehook script for modifying and extending the pipeline's default functionality.", 
+    help = "A prehook script for modifying and extending the pipeline's default functionality [default = %default].", 
     metavar = "character"
   ),
   make_option(
     c("-q", "--posthook"), 
     type = "character", 
     default = NULL, 
-    help = "A posthook script for modifying the processed dataframes before merging and saving occurs.", 
+    help = "A posthook script for modifying the processed dataframes before merging and saving occurs [default = %default].", 
     metavar = "character"
   ),
   make_option (
     c("-v", "--env"), 
     type = "character", 
     default = NULL, 
-    help = "The environment variable file.", 
+    help = "The environment variable file [default = %default].", 
     metavar = "character"
   )
 ) 
