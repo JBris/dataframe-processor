@@ -37,13 +37,31 @@ execute_pipeline = function(config) {
         }
         
         df = do.call(data_reader$name, c(data_source, data_reader$args))
-        processed_df = process_df(df, data_definition$pipeline, data_key)
+        df = process_df(df, data_definition$prepipeline, data_key)
+        processed_df = process_pipeline(df, data_definition$pipeline, data_key)
+        processed_df = process_df(processed_df, data_definition$postpipeline, data_key)
         destination_lists[[destination_key]][["dfs"]][[data_key]] = processed_df
     }
     destination_lists
 }
 
-process_df = function(df, pipeline, data_key) {
+process_df = function(df, steps, data_key) {
+    if(length(steps) == 0) {
+        return(df)
+    } 
+
+    for(step in steps) {
+        if(!is.null(step$eval)) {
+            df = eval(str2expression(step$eval))
+        } else {
+            df = do.call(step$name, c(list(df), step$args))  
+        }
+    }
+
+    df
+} 
+
+process_pipeline = function(df, pipeline, data_key) {
     if(length(pipeline) == 0) {
         return(df)
     }    

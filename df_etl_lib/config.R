@@ -128,6 +128,23 @@ validate_data_def = function(config) {
       )
     }
 
+    for(pipeline_item in list("prepipeline", "postpipeline")) {
+      if(!is.null(data_definition[[pipeline_item]])) {
+        if(!is.list(data_definition[[pipeline_item]])) {
+          stop(str_interp("Optional element '${pipeline_item}' in data definition '${data_key}' must be a list."))
+        }
+
+        for(i in seq_along(data_definition[[pipeline_item]])) {
+          step = data_definition[[pipeline_item]][[i]]
+          step = validate_func_definition(
+            step, 
+            str_interp("Step '${i}' of ${pipeline_item} steps in data definition '${data_key}'.")
+          )
+          data_definition[[pipeline_item]][[i]] = step
+        }
+      }
+    }
+
     data_definition$pipeline = validate_pipeline(data_definition$pipeline, data_key)
     data_definitions[[data_key]] = data_definition
   }

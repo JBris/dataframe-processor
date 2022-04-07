@@ -61,9 +61,15 @@ data:
             -
               eval: rep("iris", nrow(df))
 
-    
   mtcars:
     source: examples/mtcars.csv
+    prepipeline:
+      - 
+        name: round
+        args:
+          digits: 2
+      - 
+        eval: 2 * df
     pipeline: 
       preprocess:
         -
