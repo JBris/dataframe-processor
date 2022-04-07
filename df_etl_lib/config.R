@@ -159,21 +159,32 @@ validate_pipeline = function(data_pipeline, data_key) {
       for(j in seq_along(stage)) {
         stage_item = stage[[j]]
         
-        if(is.null(stage_item$source)) {
-          stop(str_interp("Data source in item '${j}' in stage '${stage_key}' in data definition '${data_key}' is required."))
-        }
-        if(!is.character(stage_item$source)) {
+        if(is.null(stage_item$source) && is.null(stage_item$destination)) {
           stop(
-            str_interp("Data source in item '${j}' in stage '${stage_key}' in data definition '${data_key}' must be a string or list of strings.")
+            str_interp("Must supply data source or destination in item '${j}' in stage '${stage_key}' in data definition '${data_key}'.")
           )
         }
 
-        if(is.null(stage_item$destination)) {
-          if(length(stage_item$source) == 1) {
-            stage_item$destination = stage_item$source
-          } else {
-            stop(str_interp("Data destination in item '${j}' in stage '${stage_key}' in data definition '${data_key}' must be provided."))
+        if(!is.null(stage_item$source)) {
+          if(!is.character(stage_item$source)) {
+            stop(
+              str_interp("Data source in item '${j}' in stage '${stage_key}' in data definition '${data_key}' must be a string or list of strings.")
+            )
           }
+
+          if(is.null(stage_item$destination)) {
+            if(length(stage_item$source) == 1) {
+              stage_item$destination = stage_item$source
+            } else {
+              stop(str_interp("Data destination in item '${j}' in stage '${stage_key}' in data definition '${data_key}' must be provided."))
+            }
+          }
+        }
+
+        if(!is.character(stage_item$destination)) {
+          stop(
+            str_interp("Data destination in item '${j}' in stage '${stage_key}' in data definition '${data_key}' must be a string or list of strings.")
+          )
         }
 
         if(is.null(stage_item$steps)) {

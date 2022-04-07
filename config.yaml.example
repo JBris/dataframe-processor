@@ -55,6 +55,12 @@ data:
           steps: 
             -
               name: ceiling
+        -
+          destination: data_source
+          steps:
+            -
+              eval: rep("iris", nrow(df))
+
     
   mtcars:
     source: examples/mtcars.csv
@@ -98,3 +104,8 @@ data:
           steps: 
             -
               name: round
+        -
+          destination: data_source
+          steps:
+            -
+              eval: rep("mtcars", nrow(df))
