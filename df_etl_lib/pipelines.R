@@ -24,6 +24,7 @@ execute_pipeline = function(config) {
     }
 
     for(data_key in data_keys) {
+        message(str_c("Processing data definition: ", data_key))
         data_definition = data_definitions[[data_key]]
         data_source = data_definition$source
         data_reader = data_definition$reader
